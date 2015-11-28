@@ -7,20 +7,20 @@
 		Include this file after a_samp.inc
 
 	Usage:
-		TextListCreate:car_tuning(playerid)
+		TextListCreate:example_tl(playerid)
 		{
 			new items[][TEXTLIST_MAX_ITEM_NAME] = {
 				"Test 1",
 				"Big Test 2"
 			};
 
-			TextList_Open(playerid, TextList:car_tuning, items, sizeof(items), "Car tunning center", "Button 1", "Button 2");
+			TextList_Open(playerid, TextList:example_tl, items, sizeof(items), "Example header", "Button 1", "Button 2");
 		}
 
-		TextListResponse:car_tuning(playerid, TextListType:response, itemid, value[])
+		TextListResponse:example_tl(playerid, TextListType:response, itemid, itemvalue[])
 		{
 			new string[128];
-			format(string, sizeof(string), " %d | %d | %d | %s", playerid, _:response, itemid, value);
+			format(string, sizeof(string), " %d | %d | %d | %s", playerid, _:response, itemid, itemvalue);
 			SendClientMessage(playerid, -1, string);
 			return 1;
 		}
