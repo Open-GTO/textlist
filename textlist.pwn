@@ -272,7 +272,7 @@ static stock GetPaginatorInfo(items_count, &curr_page, &max_page, &start_index, 
 static stock TD_ListCreate(playerid, item_id, row, text[], Float:pos_x, Float:pos_y)
 {
 	TD_ListItem[playerid][item_id] = CreatePlayerTextDraw(playerid, pos_x, pos_y + row * 20.0, text);
-	PlayerTextDrawLetterSize(playerid, TD_ListItem[playerid][item_id], 0.3, 1.5);
+	PlayerTextDrawLetterSize(playerid, TD_ListItem[playerid][item_id], 0.22, 1.5);
 	PlayerTextDrawTextSize(playerid, TD_ListItem[playerid][item_id], 13.0, 135.0);
 	PlayerTextDrawAlignment(playerid, TD_ListItem[playerid][item_id], 2);
 	PlayerTextDrawColor(playerid, TD_ListItem[playerid][item_id], -1);
