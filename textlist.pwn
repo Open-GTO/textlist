@@ -14,7 +14,15 @@
 				"Big Test 2"
 			};
 
-			TextList_Open(playerid, TextList:example_tl, items, sizeof(items), "Example header", "Button 1", "Button 2");
+			new bg_colors[TEXTLIST_MAX_ITEMS] = {
+				0xFF0000FF,
+				0x00FF00FF
+			}
+
+			TextList_Open(playerid, TextList:example_tl, items, sizeof(items),
+			              "Example header",
+			              "Button 1", "Button 2",
+			              .lists_bg_color = bg_colors);
 		}
 
 		TextListResponse:example_tl(playerid, TextListType:response, itemid, itemvalue[])
@@ -94,6 +102,16 @@ static
 	FunctionName[MAX_PLAYERS][TEXTLIST_MAX_FUNCTION_NAME],
 	ButtonName[MAX_PLAYERS][2][TEXTLIST_MAX_BUTTON_NAME],
 	TD_ListItemValue[MAX_PLAYERS][TEXTLIST_MAX_ITEMS][TEXTLIST_MAX_ITEM_NAME],
+	TD_ListBgColors[MAX_PLAYERS][TEXTLIST_MAX_ITEMS],
+	TD_ListFgColors[MAX_PLAYERS][TEXTLIST_MAX_ITEMS],
+	TD_HeaderBgColor[MAX_PLAYERS],
+	TD_HeaderFgColor[MAX_PLAYERS],
+	TD_PaginatorBgColor[MAX_PLAYERS],
+	TD_PaginatorFgColor[MAX_PLAYERS],
+	TD_Button1BgColor[MAX_PLAYERS],
+	TD_Button1FgColor[MAX_PLAYERS],
+	TD_Button2BgColor[MAX_PLAYERS],
+	TD_Button2FgColor[MAX_PLAYERS],
 	Float:TD_PosX[MAX_PLAYERS],
 	Float:TD_PosY[MAX_PLAYERS],
 	PlayerText:TD_ListHeader[MAX_PLAYERS] = {PlayerText:INVALID_TEXT_DRAW, ...},
@@ -146,12 +164,19 @@ stock TextList_Close(playerid)
 	CancelSelectTextDraw(playerid);
 }
 
-stock TextList_Open(playerid, function[], list_items[][], list_count, header[] = "",
-                    button1[] = "", button2[] = "", Float:pos_x = 89.0, Float:pos_y = 140.0)
+stock TextList_Open(playerid, function[], list_items[][], list_size = sizeof(list_items), header[] = "",
+                    button1[] = "", button2[] = "", Float:pos_x = 89.0, Float:pos_y = 140.0,
+                    select_color = 0xFFA500FF,
+                    lists_bg_color[TEXTLIST_MAX_ITEMS] = {0x212121A0, ...},
+                    lists_fg_color[TEXTLIST_MAX_ITEMS] = {0xFFFFFFFF, ...},
+                    header_bg_color = 0xB71C1CAA, header_fg_color = 0xFFFFFFFF,
+                    paginator_bg_color = 0x21212160, paginator_fg_color = 0xFFFFFFFF,
+                    button1_bg_color = 0x6D4C41AA, button1_fg_color = 0xFFFFFFFF,
+                    button2_bg_color = 0x6D4C41AA, button2_fg_color = 0xFFFFFFFF)
 {
 	TextList_Close(playerid);
 
-	new items_count = list_count;
+	new items_count = list_size;
 
 	if (items_count > TEXTLIST_MAX_ITEMS) {
 		printf("Error: so big list count value (%d, max is %d).", items_count, TEXTLIST_MAX_ITEMS);
@@ -163,6 +188,16 @@ stock TextList_Open(playerid, function[], list_items[][], list_count, header[] =
 	ListPage[playerid] = 0;
 	TD_PosX[playerid] = pos_x;
 	TD_PosY[playerid] = pos_y;
+	TD_ListBgColors[playerid] = lists_bg_color;
+	TD_ListFgColors[playerid] = lists_fg_color;
+	TD_HeaderBgColor[playerid] = header_bg_color;
+	TD_HeaderFgColor[playerid] = header_fg_color;
+	TD_PaginatorBgColor[playerid] = paginator_bg_color;
+	TD_PaginatorFgColor[playerid] = paginator_fg_color;
+	TD_Button1BgColor[playerid] = button1_bg_color;
+	TD_Button1FgColor[playerid] = button1_fg_color;
+	TD_Button2BgColor[playerid] = button2_bg_color;
+	TD_Button2FgColor[playerid] = button2_fg_color;
 	strmid(FunctionName[playerid], function, 0, strlen(function), sizeof(FunctionName[]));
 	strmid(ButtonName[playerid][0], button1, 0, strlen(button1), TEXTLIST_MAX_BUTTON_NAME);
 	strmid(ButtonName[playerid][1], button2, 0, strlen(button2), TEXTLIST_MAX_BUTTON_NAME);
@@ -173,14 +208,18 @@ stock TextList_Open(playerid, function[], list_items[][], list_count, header[] =
 
 	// header
 	if (strlen(header) != 0) {
-		TD_HeaderCreate(playerid, header, TD_PosX[playerid], TD_PosY[playerid]);
+		TD_HeaderCreate(playerid, header, header_bg_color, header_fg_color, TD_PosX[playerid], TD_PosY[playerid]);
 	}
 
 	TD_SetPage(playerid, ListPage[playerid], ListCount[playerid],
 	           TD_PosX[playerid], TD_PosY[playerid],
-	           ButtonName[playerid], TD_ListItemValue[playerid]);
+	           ButtonName[playerid], TD_ListItemValue[playerid],
+	           lists_bg_color, lists_fg_color,
+	           paginator_bg_color, paginator_fg_color,
+	           button1_bg_color, button1_fg_color,
+	           button2_bg_color, button2_fg_color);
 
-	SelectTextDraw(playerid, -5963521);
+	SelectTextDraw(playerid, select_color);
 }
 
 stock TextList_IsOpen(playerid)
@@ -194,57 +233,97 @@ stock TextList_IsOpen(playerid)
 
 */
 
-static stock TD_SetPage(playerid, &page_id, items_count, Float:pos_x, Float:pos_y, buttons[][], list_item[][])
+static stock TD_SetPage(playerid, &page_id, items_count,
+                        Float:pos_x, Float:pos_y,
+                        buttons[][], list_item[][],
+                        lists_bg_color[TEXTLIST_MAX_ITEMS], lists_fg_color[TEXTLIST_MAX_ITEMS],
+                        paginator_bg_color, paginator_fg_color,
+                        button1_bg_color, button1_fg_color,
+                        button2_bg_color, button2_fg_color)
 {
-	// clean old page
-	TD_Remove(playerid, TD_ListUp[playerid]);
-	TD_Remove(playerid, TD_ListDown[playerid]);
-	TD_Remove(playerid, TD_ListPage[playerid]);
-	TD_Remove(playerid, TD_ListBox[playerid]);
-
-	TD_Remove(playerid, TD_Button1[playerid]);
-	TD_Remove(playerid, TD_Button2[playerid]);
-
-	for (new i = 0; i < TEXTLIST_MAX_ITEMS; i++) {
-		TD_Remove(playerid, TD_ListItem[playerid][i]);
-	}
-
 	// list
 	new pages_count, start_index, end_index;
 	GetPaginatorInfo(items_count, page_id, pages_count, start_index, end_index);
 
-	// draw list
-	new current_row = 0;
-
-	for (new i = start_index; i < end_index; i++) {
-		current_row++;
-		TD_ListCreate(playerid, i, current_row, list_item[i], pos_x, pos_y);
-	}
-
-	// paginator
-	if (pages_count > 1) {
-		new string[4];
-		format(string, sizeof(string), "%d/%d", page_id + 1, pages_count);
-
-		current_row++;
-		TD_PaginatorCreate(playerid, string, pos_x, pos_y + current_row * 20.0);
-	}
-
-	// button
 	new
-		button1_length = strlen(buttons[0]),
-		button2_length = strlen(buttons[1]);
+		bool:IsDefaultItemCount = end_index - start_index == TEXTLIST_MAX_ITEMS_ON_LIST,
+		bool:IsListCreated = TD_ListItem[playerid][0] != PlayerText:INVALID_TEXT_DRAW,
+		bool:IsPageChanged = page_id != ListPage[playerid];
 
-	if (button1_length != 0 && button2_length != 0) {
-		current_row++;
-		TD_ButtonCreate(playerid, TD_Button1[playerid], buttons[0], pos_x - 36.0, pos_y + current_row * 20.0);
-		TD_ButtonCreate(playerid, TD_Button2[playerid], buttons[1], pos_x + 36.0, pos_y + current_row * 20.0);
-	} else if (button1_length != 0) {
-		current_row++;
-		TD_ButtonCreate(playerid, TD_Button1[playerid], buttons[0], pos_x, pos_y + current_row * 20.0);
-	} else if (button2_length != 0) {
-		current_row++;
-		TD_ButtonCreate(playerid, TD_Button2[playerid], buttons[1], pos_x, pos_y + current_row * 20.0);
+	if (IsDefaultItemCount && IsListCreated && IsPageChanged) {
+		// update list
+		new current_row = 0;
+
+		for (new i = start_index; i < end_index; i++) {
+			current_row++;
+			TD_ListUpdateText(playerid, current_row, list_item[i]);
+		}
+
+		// update paginator
+		if (pages_count > 1) {
+			new string[4];
+			format(string, sizeof(string), "%d/%d", page_id + 1, pages_count);
+
+			TD_PaginatorUpdateText(playerid, string);
+		}
+	} else {
+		// remove old page
+		TD_Remove(playerid, TD_ListUp[playerid]);
+		TD_Remove(playerid, TD_ListDown[playerid]);
+		TD_Remove(playerid, TD_ListPage[playerid]);
+		TD_Remove(playerid, TD_ListBox[playerid]);
+
+		TD_Remove(playerid, TD_Button1[playerid]);
+		TD_Remove(playerid, TD_Button2[playerid]);
+
+		for (new i = 0; i < TEXTLIST_MAX_ITEMS; i++) {
+			TD_Remove(playerid, TD_ListItem[playerid][i]);
+		}
+
+		// draw list
+		new current_row = 0;
+
+		for (new i = start_index; i < end_index; i++) {
+			current_row++;
+			TD_ListCreate(playerid, i, current_row, list_item[i], lists_bg_color[i], lists_fg_color[i], pos_x, pos_y);
+		}
+
+		// paginator
+		if (pages_count > 1) {
+			new string[4];
+			format(string, sizeof(string), "%d/%d", page_id + 1, pages_count);
+
+			current_row++;
+			TD_PaginatorCreate(playerid, string, paginator_bg_color, paginator_fg_color,
+			                   pos_x, pos_y + current_row * 20.0);
+		}
+
+		// button
+		new
+			button1_length = strlen(buttons[0]),
+			button2_length = strlen(buttons[1]);
+
+		if (button1_length != 0 && button2_length != 0) {
+			current_row++;
+
+			TD_ButtonCreate(playerid, TD_Button1[playerid],
+			                buttons[0], button1_bg_color, button1_fg_color,
+			                pos_x - 36.0, pos_y + current_row * 20.0);
+
+			TD_ButtonCreate(playerid, TD_Button2[playerid],
+			                buttons[1], button2_bg_color, button2_fg_color,
+			                pos_x + 36.0, pos_y + current_row * 20.0);
+		} else if (button1_length != 0) {
+			current_row++;
+			TD_ButtonCreate(playerid, TD_Button1[playerid],
+			                buttons[0], button1_bg_color, button1_fg_color,
+			                pos_x, pos_y + current_row * 20.0);
+		} else if (button2_length != 0) {
+			current_row++;
+			TD_ButtonCreate(playerid, TD_Button2[playerid],
+			                buttons[0], button2_bg_color, button2_fg_color,
+			                pos_x, pos_y + current_row * 20.0);
+		}
 	}
 }
 
@@ -269,15 +348,15 @@ static stock GetPaginatorInfo(items_count, &curr_page, &max_page, &start_index, 
 	}
 }
 
-static stock TD_ListCreate(playerid, item_id, row, text[], Float:pos_x, Float:pos_y)
+static stock TD_ListCreate(playerid, item_id, row, text[], bg_color, fg_color, Float:pos_x, Float:pos_y)
 {
 	TD_ListItem[playerid][item_id] = CreatePlayerTextDraw(playerid, pos_x, pos_y + row * 20.0, text);
 	PlayerTextDrawLetterSize(playerid, TD_ListItem[playerid][item_id], 0.22, 1.5);
 	PlayerTextDrawTextSize(playerid, TD_ListItem[playerid][item_id], 13.0, 135.0);
 	PlayerTextDrawAlignment(playerid, TD_ListItem[playerid][item_id], 2);
-	PlayerTextDrawColor(playerid, TD_ListItem[playerid][item_id], -1);
+	PlayerTextDrawColor(playerid, TD_ListItem[playerid][item_id], fg_color);
 	PlayerTextDrawUseBox(playerid, TD_ListItem[playerid][item_id], 1);
-	PlayerTextDrawBoxColor(playerid, TD_ListItem[playerid][item_id], 0x212121A0);
+	PlayerTextDrawBoxColor(playerid, TD_ListItem[playerid][item_id], bg_color);
 	PlayerTextDrawSetShadow(playerid, TD_ListItem[playerid][item_id], 0);
 	PlayerTextDrawSetOutline(playerid, TD_ListItem[playerid][item_id], 0);
 	PlayerTextDrawBackgroundColor(playerid, TD_ListItem[playerid][item_id], 255);
@@ -288,7 +367,12 @@ static stock TD_ListCreate(playerid, item_id, row, text[], Float:pos_x, Float:po
 	PlayerTextDrawShow(playerid, TD_ListItem[playerid][item_id]);
 }
 
-static stock TD_PaginatorCreate(playerid, pagestr[], Float:pos_x, Float:pos_y)
+static stock TD_ListUpdateText(playerid, item_id, text[])
+{
+	PlayerTextDrawSetString(playerid, TD_ListItem[playerid][item_id], text);
+}
+
+static stock TD_PaginatorCreate(playerid, pagestr[], bg_color, fg_color, Float:pos_x, Float:pos_y)
 {
 	TD_ListUp[playerid] = CreatePlayerTextDraw(playerid, pos_x - 20.0, pos_y, "LD_BEAT:up");
 	PlayerTextDrawLetterSize(playerid, TD_ListUp[playerid], 0.0, 0.0);
@@ -307,7 +391,7 @@ static stock TD_PaginatorCreate(playerid, pagestr[], Float:pos_x, Float:pos_y)
 	PlayerTextDrawLetterSize(playerid, TD_ListDown[playerid], 0.0, 0.0);
 	PlayerTextDrawTextSize(playerid, TD_ListDown[playerid], 10.0, 13.0);
 	PlayerTextDrawAlignment(playerid, TD_ListDown[playerid], 1);
-	PlayerTextDrawColor(playerid, TD_ListDown[playerid], -1);
+	PlayerTextDrawColor(playerid, TD_ListDown[playerid], fg_color);
 	PlayerTextDrawSetShadow(playerid, TD_ListDown[playerid], 0);
 	PlayerTextDrawSetOutline(playerid, TD_ListDown[playerid], 0);
 	PlayerTextDrawBackgroundColor(playerid, TD_ListDown[playerid], 255);
@@ -319,7 +403,7 @@ static stock TD_PaginatorCreate(playerid, pagestr[], Float:pos_x, Float:pos_y)
 	TD_ListPage[playerid] = CreatePlayerTextDraw(playerid, pos_x, pos_y + 1.0, pagestr);
 	PlayerTextDrawLetterSize(playerid, TD_ListPage[playerid], 0.2, 1.0);
 	PlayerTextDrawAlignment(playerid, TD_ListPage[playerid], 2);
-	PlayerTextDrawColor(playerid, TD_ListPage[playerid], -1);
+	PlayerTextDrawColor(playerid, TD_ListPage[playerid], fg_color);
 	PlayerTextDrawSetShadow(playerid, TD_ListPage[playerid], 0);
 	PlayerTextDrawSetOutline(playerid, TD_ListPage[playerid], 0);
 	PlayerTextDrawBackgroundColor(playerid, TD_ListPage[playerid], 255);
@@ -331,9 +415,9 @@ static stock TD_PaginatorCreate(playerid, pagestr[], Float:pos_x, Float:pos_y)
 	PlayerTextDrawLetterSize(playerid, TD_ListBox[playerid], 0.0, 1.5);
 	PlayerTextDrawTextSize(playerid, TD_ListBox[playerid], 10.0, 135.0);
 	PlayerTextDrawAlignment(playerid, TD_ListBox[playerid], 2);
-	PlayerTextDrawColor(playerid, TD_ListBox[playerid], -1);
+	PlayerTextDrawColor(playerid, TD_ListBox[playerid], fg_color);
 	PlayerTextDrawUseBox(playerid, TD_ListBox[playerid], 1);
-	PlayerTextDrawBoxColor(playerid, TD_ListBox[playerid], 0x21212160);
+	PlayerTextDrawBoxColor(playerid, TD_ListBox[playerid], bg_color);
 	PlayerTextDrawSetShadow(playerid, TD_ListBox[playerid], 0);
 	PlayerTextDrawSetOutline(playerid, TD_ListBox[playerid], 0);
 	PlayerTextDrawBackgroundColor(playerid, TD_ListBox[playerid], 255);
@@ -347,15 +431,20 @@ static stock TD_PaginatorCreate(playerid, pagestr[], Float:pos_x, Float:pos_y)
 	PlayerTextDrawShow(playerid, TD_ListBox[playerid]);
 }
 
-static stock TD_HeaderCreate(playerid, text[], Float:pos_x, Float:pos_y)
+static stock TD_PaginatorUpdateText(playerid, pagestr[])
+{
+	PlayerTextDrawSetString(playerid, TD_ListPage[playerid], pagestr);
+}
+
+static stock TD_HeaderCreate(playerid, text[], bg_color, fg_color, Float:pos_x, Float:pos_y)
 {
 	TD_ListHeader[playerid] = CreatePlayerTextDraw(playerid, pos_x, pos_y, text);
 	PlayerTextDrawLetterSize(playerid, TD_ListHeader[playerid], 0.3, 1.5);
 	PlayerTextDrawTextSize(playerid, TD_ListHeader[playerid], 13.0, 135.0 + 8.0);
 	PlayerTextDrawAlignment(playerid, TD_ListHeader[playerid], 2);
-	PlayerTextDrawColor(playerid, TD_ListHeader[playerid], -1);
+	PlayerTextDrawColor(playerid, TD_ListHeader[playerid], fg_color);
 	PlayerTextDrawUseBox(playerid, TD_ListHeader[playerid], 1);
-	PlayerTextDrawBoxColor(playerid, TD_ListHeader[playerid], 0xB71C1CAA);
+	PlayerTextDrawBoxColor(playerid, TD_ListHeader[playerid], bg_color);
 	PlayerTextDrawSetShadow(playerid, TD_ListHeader[playerid], 0);
 	PlayerTextDrawSetOutline(playerid, TD_ListHeader[playerid], 0);
 	PlayerTextDrawBackgroundColor(playerid, TD_ListHeader[playerid], 255);
@@ -365,15 +454,15 @@ static stock TD_HeaderCreate(playerid, text[], Float:pos_x, Float:pos_y)
 	PlayerTextDrawShow(playerid, TD_ListHeader[playerid]);
 }
 
-static stock TD_ButtonCreate(playerid, &PlayerText:button, text[], Float:pos_x, Float:pos_y)
+static stock TD_ButtonCreate(playerid, &PlayerText:button, text[], bg_color, fg_color, Float:pos_x, Float:pos_y)
 {
 	button = CreatePlayerTextDraw(playerid, pos_x, pos_y, text);
 	PlayerTextDrawLetterSize(playerid, button, 0.25, 1.4);
 	PlayerTextDrawTextSize(playerid, button, 13.0, 68.0);
 	PlayerTextDrawAlignment(playerid, button, 2);
-	PlayerTextDrawColor(playerid, button, -1);
+	PlayerTextDrawColor(playerid, button, fg_color);
 	PlayerTextDrawUseBox(playerid, button, 1);
-	PlayerTextDrawBoxColor(playerid, button, 0x6D4C41AA);
+	PlayerTextDrawBoxColor(playerid, button, bg_color);
 	PlayerTextDrawSetShadow(playerid, button, 0);
 	PlayerTextDrawSetOutline(playerid, button, 0);
 	PlayerTextDrawBackgroundColor(playerid, button, 255);
@@ -444,14 +533,22 @@ public OnPlayerClickPlayerTextDraw(playerid, PlayerText:playertextid)
 			ListPage[playerid]--;
 			TD_SetPage(playerid, ListPage[playerid], ListCount[playerid],
 			           TD_PosX[playerid], TD_PosY[playerid],
-			           ButtonName[playerid], TD_ListItemValue[playerid]);
+			           ButtonName[playerid], TD_ListItemValue[playerid],
+			           TD_ListBgColors[playerid], TD_ListFgColors[playerid],
+			           TD_PaginatorBgColor[playerid], TD_PaginatorFgColor[playerid],
+			           TD_Button1BgColor[playerid], TD_Button1FgColor[playerid],
+			           TD_Button2BgColor[playerid], TD_Button2FgColor[playerid]);
 
 			response_type = TextListType:TextList_ListUp;
 		} else if (TD_ListDown[playerid] == playertextid) {
 			ListPage[playerid]++;
 			TD_SetPage(playerid, ListPage[playerid], ListCount[playerid],
 			           TD_PosX[playerid], TD_PosY[playerid],
-			           ButtonName[playerid], TD_ListItemValue[playerid]);
+			           ButtonName[playerid], TD_ListItemValue[playerid],
+			           TD_ListBgColors[playerid], TD_ListFgColors[playerid],
+			           TD_PaginatorBgColor[playerid], TD_PaginatorFgColor[playerid],
+			           TD_Button1BgColor[playerid], TD_Button1FgColor[playerid],
+			           TD_Button2BgColor[playerid], TD_Button2FgColor[playerid]);
 
 			response_type = TextListType:TextList_ListDown;
 		}
