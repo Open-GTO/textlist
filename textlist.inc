@@ -52,8 +52,14 @@
 
 */
 
-#define TEXTLIST_MAX_ITEMS         30
-#define TEXTLIST_MAX_ITEMS_ON_LIST 10
+#if !defined TEXTLIST_MAX_ITEMS
+	#define TEXTLIST_MAX_ITEMS         30
+#endif
+
+#if !defined TEXTLIST_MAX_ITEMS_ON_LIST
+	#define TEXTLIST_MAX_ITEMS_ON_LIST 10
+#endif
+
 #define TEXTLIST_MAX_ITEM_NAME     32
 #define TEXTLIST_MAX_FUNCTION_NAME 31
 #define TEXTLIST_MAX_BUTTON_NAME   12
