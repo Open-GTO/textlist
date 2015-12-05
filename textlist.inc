@@ -338,6 +338,10 @@ static stock TD_SetPage(playerid, &page_id, items_count,
 
 static stock GetPaginatorInfo(items_count, &curr_page, &max_page, &start_index, &end_index)
 {
+	if (items_count <= 0) {
+		return;
+	}
+
 	max_page = items_count / TEXTLIST_MAX_ITEMS_ON_LIST;
 	if (items_count % TEXTLIST_MAX_ITEMS_ON_LIST != 0) {
 		max_page++;
