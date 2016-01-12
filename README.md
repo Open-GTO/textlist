@@ -1,6 +1,10 @@
 # textlist
 Text List system
 
+# Screens
+![tunning textlist](http://i.imgur.com/x39yVSK.png)
+![color textlist](http://i.imgur.com/XI7vYI6.png)
+
 # Functions
 ```Pawn
 // show created TextList
