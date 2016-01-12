@@ -17,7 +17,7 @@
 			new bg_colors[TEXTLIST_MAX_ITEMS] = {
 				0xFF0000FF,
 				0x00FF00FF
-			}
+			};
 
 			TextList_Open(playerid, TextList:example_tl, items, sizeof(items),
 			              "Example header",

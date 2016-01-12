@@ -18,7 +18,7 @@ TextList_Open(playerid, function[], list_items[][], list_size = sizeof(list_item
 // close TextList
 TextList_Close(playerid);
 // is TextList opened
-TextList_IsOpen(playerid)
+TextList_IsOpen(playerid);
 ```
 
 # Usage
@@ -34,7 +34,7 @@ TextListCreate:example_tl(playerid)
 	new bg_colors[TEXTLIST_MAX_ITEMS] = {
 		0xFF0000FF,
 		0x00FF00FF
-	}
+	};
 
 	TextList_Open(playerid, TextList:example_tl, items, sizeof(items),
 	              "Example header",
