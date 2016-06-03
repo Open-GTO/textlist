@@ -44,7 +44,6 @@
 #endif
 
 #define _textlist_included
-#pragma library textlist
 
 /*
 
@@ -355,7 +354,7 @@ static stock GetPaginatorInfo(items_count, &curr_page, &max_page, &start_index, 
 
 	start_index = curr_page * TEXTLIST_MAX_ITEMS_ON_LIST;
 	end_index = start_index + TEXTLIST_MAX_ITEMS_ON_LIST;
-	
+
 	if (items_count % end_index == items_count) {
 		end_index = start_index + items_count % TEXTLIST_MAX_ITEMS_ON_LIST;
 	}
@@ -463,7 +462,7 @@ static stock TD_HeaderCreate(playerid, text[], bg_color, fg_color, Float:pos_x, 
 	PlayerTextDrawBackgroundColor(playerid, TD_ListHeader[playerid], 255);
 	PlayerTextDrawFont(playerid, TD_ListHeader[playerid], 1);
 	PlayerTextDrawSetProportional(playerid, TD_ListHeader[playerid], 1);
-	
+
 	PlayerTextDrawShow(playerid, TD_ListHeader[playerid]);
 }
 
@@ -580,7 +579,7 @@ public OnPlayerClickPlayerTextDraw(playerid, PlayerText:playertextid)
 			CallLocalFunction(call_func, "iiis", playerid, _:response_type, list_id, value);
 		}
 	}
-	
+
 	CallLocalFunction("TL_OPClickPlayerTextDraw", "ii", playerid, _:playertextid);
 	return 1;
 }
