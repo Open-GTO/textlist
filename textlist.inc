@@ -3,7 +3,7 @@
 	About: text list system
 	Author:	ziggi
 
-	Instalation:
+	Installation:
 		Include this file after a_samp.inc
 
 	Usage:
@@ -138,8 +138,7 @@ static
 
 stock TextList_Show(playerid, function[])
 {
-	new call_func[TEXTLIST_MAX_FUNCTION_NAME];
-	strcat(call_func, "tlc_");
+	new call_func[TEXTLIST_MAX_FUNCTION_NAME] = "tlc_";
 	strcat(call_func, function);
 
 	CallLocalFunction(call_func, "i", playerid);
@@ -205,12 +204,12 @@ stock TextList_Open(playerid, function[], list_items[][], list_size = sizeof(lis
 	TD_Button1FgColor[playerid] = button1_fg_color;
 	TD_Button2BgColor[playerid] = button2_bg_color;
 	TD_Button2FgColor[playerid] = button2_fg_color;
-	strmid(FunctionName[playerid], function, 0, strlen(function), sizeof(FunctionName[]));
-	strmid(ButtonName[playerid][0], button1, 0, strlen(button1), TEXTLIST_MAX_BUTTON_NAME);
-	strmid(ButtonName[playerid][1], button2, 0, strlen(button2), TEXTLIST_MAX_BUTTON_NAME);
+	TL_strcpy(FunctionName[playerid], function, TEXTLIST_MAX_FUNCTION_NAME);
+	TL_strcpy(ButtonName[playerid][0], button1, TEXTLIST_MAX_BUTTON_NAME);
+	TL_strcpy(ButtonName[playerid][1], button2, TEXTLIST_MAX_BUTTON_NAME);
 
 	for (new i = 0; i < items_count; i++) {
-		strmid(TD_ListItemValue[playerid][i], list_items[i], 0, strlen(list_items[i]), TEXTLIST_MAX_ITEM_NAME);
+		TL_strcpy(TD_ListItemValue[playerid][i], list_items[i], TEXTLIST_MAX_ITEM_NAME);
 	}
 
 	// header
@@ -492,24 +491,40 @@ static stock TD_Remove(playerid, &PlayerText:td)
 	td = PlayerText:INVALID_TEXT_DRAW;
 }
 
+/*
+
+	OnPlayerDisconnect
+
+*/
+
 public OnPlayerDisconnect(playerid, reason)
 {
 	if (TextList_IsOpen(playerid)) {
 		TextList_Close(playerid);
 	}
 
-	CallLocalFunction("TL_OnPlayerDisconnect", "ii", playerid, reason);
-	return 1;
+	#if defined TL_OnPlayerDisconnect
+		return TL_OnPlayerDisconnect(playerid, reason);
+	#else
+		return 1;
+	#endif
 }
-
 #if defined _ALS_OnPlayerDisconnect
 	#undef OnPlayerDisconnect
 #else
 	#define _ALS_OnPlayerDisconnect
 #endif
-#define OnPlayerDisconnect TL_OnPlayerDisconnect
-forward OnPlayerDisconnect(playerid, reason);
 
+#define OnPlayerDisconnect TL_OnPlayerDisconnect
+#if defined TL_OnPlayerDisconnect
+	forward TL_OnPlayerDisconnect(playerid, reason);
+#endif
+
+/*
+
+	OnPlayerClickPlayerTextDraw
+
+*/
 
 public OnPlayerClickPlayerTextDraw(playerid, PlayerText:playertextid)
 {
@@ -528,7 +543,7 @@ public OnPlayerClickPlayerTextDraw(playerid, PlayerText:playertextid)
 		}
 
 		if (list_id != -1) {
-			strmid(value, TD_ListItemValue[playerid][list_id], 0, strlen(TD_ListItemValue[playerid][list_id]), TEXTLIST_MAX_ITEM_NAME);
+			TL_strcpy(value, TD_ListItemValue[playerid][list_id], TEXTLIST_MAX_ITEM_NAME);
 		} else {
 			value[0] = '\1';
 		}
@@ -571,8 +586,7 @@ public OnPlayerClickPlayerTextDraw(playerid, PlayerText:playertextid)
 		}
 
 		// call function
-		new call_func[TEXTLIST_MAX_FUNCTION_NAME];
-		strcat(call_func, "tlr_");
+		new call_func[TEXTLIST_MAX_FUNCTION_NAME] = "tlr_";
 		strcat(call_func, FunctionName[playerid]);
 
 		if (funcidx(call_func) != -1) {
@@ -580,18 +594,28 @@ public OnPlayerClickPlayerTextDraw(playerid, PlayerText:playertextid)
 		}
 	}
 
-	CallLocalFunction("TL_OPClickPlayerTextDraw", "ii", playerid, _:playertextid);
-	return 1;
+	#if defined TL_OnPlayerClickPlayerTextDraw
+		return TL_OnPlayerClickPlayerTextDraw(playerid, playertextid);
+	#else
+		return 1;
+	#endif
 }
-
-#if defined _ALS_OPClickPlayerTextDraw
-	#undef OPClickPlayerTextDraw
+#if defined _ALS_OnPlayerClickPlayerTextDraw
+	#undef OnPlayerClickPlayerTextDraw
 #else
-	#define _ALS_OPClickPlayerTextDraw
+	#define _ALS_OnPlayerClickPlayerTextDraw
 #endif
-#define OPClickPlayerTextDraw TL_OPClickPlayerTextDraw
-forward OPClickPlayerTextDraw(playerid, PlayerText:playertextid);
 
+#define OnPlayerClickPlayerTextDraw TL_OnPlayerClickPlayerTextDraw
+#if defined TL_OnPlayerClickPlayerTextDraw
+	forward TL_OnPlayerClickPlayerTextDraw(playerid, PlayerText:playertextid);
+#endif
+
+/*
+
+	OnPlayerClickTextDraw
+
+*/
 
 public OnPlayerClickTextDraw(playerid, Text:clickedid)
 {
@@ -599,8 +623,7 @@ public OnPlayerClickTextDraw(playerid, Text:clickedid)
 		if (TD_FirstCancelSkipped[playerid]) {
 			TD_FirstCancelSkipped[playerid] = false;
 		} else {
-			new call_func[TEXTLIST_MAX_FUNCTION_NAME];
-			strcat(call_func, "tlr_");
+			new call_func[TEXTLIST_MAX_FUNCTION_NAME] = "tlr_";
 			strcat(call_func, FunctionName[playerid]);
 
 			if (funcidx(call_func) != -1) {
@@ -610,14 +633,31 @@ public OnPlayerClickTextDraw(playerid, Text:clickedid)
 		return 0;
 	}
 
-	CallLocalFunction("TL_OnPlayerClickTextDraw", "ii", playerid, _:clickedid);
-	return 1;
+	#if defined TL_OnPlayerClickTextDraw
+		return TL_OnPlayerClickTextDraw(playerid, Text:clickedid);
+	#else
+		return 1;
+	#endif
 }
-
 #if defined _ALS_OnPlayerClickTextDraw
 	#undef OnPlayerClickTextDraw
 #else
 	#define _ALS_OnPlayerClickTextDraw
 #endif
+
 #define OnPlayerClickTextDraw TL_OnPlayerClickTextDraw
-forward OnPlayerClickTextDraw(playerid, Text:clickedid);
+#if defined TL_OnPlayerClickTextDraw
+	forward TL_OnPlayerClickTextDraw(playerid, Text:clickedid);
+#endif
+
+/*
+
+	Helpers
+
+*/
+
+static stock TL_strcpy(result[], source[], const size = sizeof(result))
+{
+	result[0] = 0;
+	return strcat(result, source, size);
+}
