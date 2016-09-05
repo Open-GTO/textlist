@@ -600,10 +600,10 @@ public OnPlayerClickPlayerTextDraw(playerid, PlayerText:playertextid)
 		return 1;
 	#endif
 }
-#if defined _ALS_OnPlayerClickPlayerTextDraw
+#if defined _ALS_OnPlayerClickPlayerTD
 	#undef OnPlayerClickPlayerTextDraw
 #else
-	#define _ALS_OnPlayerClickPlayerTextDraw
+	#define _ALS_OnPlayerClickPlayerTD
 #endif
 
 #define OnPlayerClickPlayerTextDraw TL_OnPlayerClickPlayerTextDraw
