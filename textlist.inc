@@ -1,6 +1,6 @@
 /*
 
-	About: text list system
+	About: Text List system
 	Author:	ziggi
 
 	Installation:
@@ -52,7 +52,7 @@
 */
 
 #if !defined TEXTLIST_MAX_ITEMS
-	#define TEXTLIST_MAX_ITEMS         30
+	#define TEXTLIST_MAX_ITEMS 30
 #endif
 
 #if !defined TEXTLIST_MAX_ITEMS_ON_LIST
@@ -185,7 +185,7 @@ stock TextList_Open(playerid, function[], list_items[][], list_size = sizeof(lis
 	new items_count = list_size;
 
 	if (items_count > TEXTLIST_MAX_ITEMS) {
-		printf("Error: so big list count value (%d, max is %d).", items_count, TEXTLIST_MAX_ITEMS);
+		printf("Error (TextList): list count value is too big (%d, max is %d).", items_count, TEXTLIST_MAX_ITEMS);
 		items_count = TEXTLIST_MAX_ITEMS;
 	}
 
@@ -268,7 +268,7 @@ static stock TD_SetPage(playerid, &page_id, items_count,
 
 		// update paginator
 		if (pages_count > 1) {
-			new string[4];
+			new string[8];
 			format(string, sizeof(string), "%d/%d", page_id + 1, pages_count);
 
 			TD_PaginatorUpdateText(playerid, string);
@@ -292,12 +292,13 @@ static stock TD_SetPage(playerid, &page_id, items_count,
 
 		for (new i = start_index; i < end_index; i++) {
 			current_row++;
-			TD_ListCreate(playerid, i, current_row, list_item[i], lists_bg_color[i], lists_fg_color[i], pos_x, pos_y);
+			TD_ListCreate(playerid, i, list_item[i], lists_bg_color[i], lists_fg_color[i],
+			              pos_x, pos_y + current_row * 20.0);
 		}
 
 		// paginator
 		if (pages_count > 1) {
-			new string[4];
+			new string[8];
 			format(string, sizeof(string), "%d/%d", page_id + 1, pages_count);
 
 			current_row++;
@@ -359,9 +360,9 @@ static stock GetPaginatorInfo(items_count, &curr_page, &max_page, &start_index, 
 	}
 }
 
-static stock TD_ListCreate(playerid, item_id, row, text[], bg_color, fg_color, Float:pos_x, Float:pos_y)
+static stock TD_ListCreate(playerid, item_id, text[], bg_color, fg_color, Float:pos_x, Float:pos_y)
 {
-	TD_ListItem[playerid][item_id] = CreatePlayerTextDraw(playerid, pos_x, pos_y + row * 20.0, text);
+	TD_ListItem[playerid][item_id] = CreatePlayerTextDraw(playerid, pos_x, pos_y, text);
 	PlayerTextDrawLetterSize(playerid, TD_ListItem[playerid][item_id], 0.22, 1.5);
 	PlayerTextDrawTextSize(playerid, TD_ListItem[playerid][item_id], 13.0, 135.0);
 	PlayerTextDrawAlignment(playerid, TD_ListItem[playerid][item_id], 2);
@@ -556,7 +557,7 @@ public OnPlayerClickPlayerTextDraw(playerid, PlayerText:playertextid)
 		}
 
 		// check paginator
-		if (TD_ListUp[playerid] == playertextid) {
+		if (TD_ListUp[playerid] == playertextid && ListPage[playerid] != 0) {
 			ListPage[playerid]--;
 			TD_SetPage(playerid, ListPage[playerid], ListCount[playerid],
 			           TD_PosX[playerid], TD_PosY[playerid],
@@ -567,7 +568,12 @@ public OnPlayerClickPlayerTextDraw(playerid, PlayerText:playertextid)
 			           TD_Button2BgColor[playerid], TD_Button2FgColor[playerid]);
 
 			response_type = TextListType:TextList_ListUp;
-		} else if (TD_ListDown[playerid] == playertextid) {
+		}
+
+		new max_page;
+		GetPaginatorInfo(ListCount[playerid], .max_page = max_page);
+
+		if (TD_ListDown[playerid] == playertextid && ListPage[playerid] != max_page - 1) {
 			ListPage[playerid]++;
 			TD_SetPage(playerid, ListPage[playerid], ListCount[playerid],
 			           TD_PosX[playerid], TD_PosY[playerid],
@@ -591,13 +597,14 @@ public OnPlayerClickPlayerTextDraw(playerid, PlayerText:playertextid)
 
 		if (funcidx(call_func) != -1) {
 			CallLocalFunction(call_func, "iiis", playerid, _:response_type, list_id, value);
+			return 1;
 		}
 	}
 
 	#if defined TL_OnPlayerClickPlayerTextDraw
 		return TL_OnPlayerClickPlayerTextDraw(playerid, playertextid);
 	#else
-		return 1;
+		return 0;
 	#endif
 }
 #if defined _ALS_OnPlayerClickPlayerTD
@@ -630,13 +637,13 @@ public OnPlayerClickTextDraw(playerid, Text:clickedid)
 				CallLocalFunction(call_func, "iiis", playerid, _:TextList_Cancel, -1, "cancel");
 			}
 		}
-		return 0;
+		return 1;
 	}
 
 	#if defined TL_OnPlayerClickTextDraw
 		return TL_OnPlayerClickTextDraw(playerid, Text:clickedid);
 	#else
-		return 1;
+		return 0;
 	#endif
 }
 #if defined _ALS_OnPlayerClickTextDraw
