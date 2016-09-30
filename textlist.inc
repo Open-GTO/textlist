@@ -335,7 +335,7 @@ static stock TD_SetPage(playerid, &page_id, items_count,
 	}
 }
 
-static stock GetPaginatorInfo(items_count, &curr_page, &max_page, &start_index, &end_index)
+static stock GetPaginatorInfo(items_count, &curr_page = 0, &max_page = 0, &start_index = 0, &end_index = 0)
 {
 	if (items_count <= 0) {
 		return;
