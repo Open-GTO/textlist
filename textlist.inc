@@ -107,7 +107,7 @@ static
 	ListPage[MAX_PLAYERS],
 	FunctionName[MAX_PLAYERS][TEXTLIST_MAX_FUNCTION_NAME],
 	ButtonName[MAX_PLAYERS][2][TEXTLIST_MAX_BUTTON_NAME],
-	bool:TD_FirstCancelSkipped[MAX_PLAYERS],
+	bool:TD_SkipCancel[MAX_PLAYERS],
 	TD_ListItemValue[MAX_PLAYERS][TEXTLIST_MAX_ITEMS][TEXTLIST_MAX_ITEM_NAME],
 	TD_ListBgColors[MAX_PLAYERS][TEXTLIST_MAX_ITEMS],
 	TD_ListFgColors[MAX_PLAYERS][TEXTLIST_MAX_ITEMS],
@@ -167,6 +167,7 @@ stock TextList_Close(playerid)
 		TD_Remove(playerid, TD_ListItem[playerid][i]);
 	}
 
+	TD_SkipCancel[playerid] = true;
 	CancelSelectTextDraw(playerid);
 }
 
@@ -226,7 +227,6 @@ stock TextList_Open(playerid, function[], list_items[][], list_size = sizeof(lis
 	           button2_bg_color, button2_fg_color);
 
 	SelectTextDraw(playerid, select_color);
-	TD_FirstCancelSkipped[playerid] = true;
 }
 
 stock TextList_IsOpen(playerid)
@@ -626,16 +626,17 @@ public OnPlayerClickPlayerTextDraw(playerid, PlayerText:playertextid)
 
 public OnPlayerClickTextDraw(playerid, Text:clickedid)
 {
-	if (clickedid == Text:INVALID_TEXT_DRAW && TextList_IsOpen(playerid)) {
-		if (TD_FirstCancelSkipped[playerid]) {
-			TD_FirstCancelSkipped[playerid] = false;
-		} else {
-			new call_func[TEXTLIST_MAX_FUNCTION_NAME] = "tlr_";
-			strcat(call_func, FunctionName[playerid]);
+	if (clickedid == Text:INVALID_TEXT_DRAW && TD_SkipCancel[playerid]) {
+		TD_SkipCancel[playerid] = false;
+		return 1;
+	}
 
-			if (funcidx(call_func) != -1) {
-				CallLocalFunction(call_func, "iiis", playerid, _:TextList_Cancel, -1, "cancel");
-			}
+	if (clickedid == Text:INVALID_TEXT_DRAW && TextList_IsOpen(playerid)) {
+		new call_func[TEXTLIST_MAX_FUNCTION_NAME] = "tlr_";
+		strcat(call_func, FunctionName[playerid]);
+
+		if (funcidx(call_func) != -1) {
+			CallLocalFunction(call_func, "iiis", playerid, _:TextList_Cancel, -1, "cancel");
 		}
 		return 1;
 	}
