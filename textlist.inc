@@ -136,7 +136,7 @@ static
 
 */
 
-stock TextList_Show(playerid, function[])
+stock TextList_Show(playerid, const function[])
 {
 	new call_func[TEXTLIST_MAX_FUNCTION_NAME] = "tlc_";
 	strcat(call_func, function);
@@ -171,11 +171,11 @@ stock TextList_Close(playerid)
 	CancelSelectTextDraw(playerid);
 }
 
-stock TextList_Open(playerid, function[], list_items[][], list_size = sizeof(list_items), header[] = "",
-                    button1[] = "", button2[] = "", Float:pos_x = 89.0, Float:pos_y = 140.0,
+stock TextList_Open(playerid, const function[], const list_items[][], const list_size = sizeof(list_items), const header[] = "",
+                    const button1[] = "", const button2[] = "", Float:pos_x = 89.0, Float:pos_y = 140.0,
                     select_color = 0xFFA500FF,
-                    lists_bg_color[TEXTLIST_MAX_ITEMS] = {0x212121A0, ...},
-                    lists_fg_color[TEXTLIST_MAX_ITEMS] = {0xFFFFFFFF, ...},
+                    const lists_bg_color[TEXTLIST_MAX_ITEMS] = {0x212121A0, ...},
+                    const lists_fg_color[TEXTLIST_MAX_ITEMS] = {0xFFFFFFFF, ...},
                     header_bg_color = 0xB71C1CAA, header_fg_color = 0xFFFFFFFF,
                     paginator_bg_color = 0x21212160, paginator_fg_color = 0xFFFFFFFF,
                     button1_bg_color = 0x6D4C41AA, button1_fg_color = 0xFFFFFFFF,
@@ -242,8 +242,8 @@ stock TextList_IsOpen(playerid)
 
 static stock TD_SetPage(playerid, &page_id, items_count,
                         Float:pos_x, Float:pos_y,
-                        buttons[][], list_item[][],
-                        lists_bg_color[TEXTLIST_MAX_ITEMS], lists_fg_color[TEXTLIST_MAX_ITEMS],
+                        const buttons[][], const list_item[][],
+                        const lists_bg_color[TEXTLIST_MAX_ITEMS], const lists_fg_color[TEXTLIST_MAX_ITEMS],
                         paginator_bg_color, paginator_fg_color,
                         button1_bg_color, button1_fg_color,
                         button2_bg_color, button2_fg_color)
@@ -360,7 +360,7 @@ static stock GetPaginatorInfo(items_count, &curr_page = 0, &max_page = 0, &start
 	}
 }
 
-static stock TD_ListCreate(playerid, item_id, text[], bg_color, fg_color, Float:pos_x, Float:pos_y)
+static stock TD_ListCreate(playerid, item_id, const text[], bg_color, fg_color, Float:pos_x, Float:pos_y)
 {
 	TD_ListItem[playerid][item_id] = CreatePlayerTextDraw(playerid, pos_x, pos_y, text);
 	PlayerTextDrawLetterSize(playerid, TD_ListItem[playerid][item_id], 0.22, 1.5);
@@ -379,12 +379,12 @@ static stock TD_ListCreate(playerid, item_id, text[], bg_color, fg_color, Float:
 	PlayerTextDrawShow(playerid, TD_ListItem[playerid][item_id]);
 }
 
-static stock TD_ListUpdateText(playerid, item_id, text[])
+static stock TD_ListUpdateText(playerid, item_id, const text[])
 {
 	PlayerTextDrawSetString(playerid, TD_ListItem[playerid][item_id], text);
 }
 
-static stock TD_PaginatorCreate(playerid, pagestr[], bg_color, fg_color, Float:pos_x, Float:pos_y)
+static stock TD_PaginatorCreate(playerid, const pagestr[], bg_color, fg_color, Float:pos_x, Float:pos_y)
 {
 	TD_ListUp[playerid] = CreatePlayerTextDraw(playerid, pos_x - 20.0, pos_y, "LD_BEAT:up");
 	PlayerTextDrawLetterSize(playerid, TD_ListUp[playerid], 0.0, 0.0);
@@ -443,12 +443,12 @@ static stock TD_PaginatorCreate(playerid, pagestr[], bg_color, fg_color, Float:p
 	PlayerTextDrawShow(playerid, TD_ListBox[playerid]);
 }
 
-static stock TD_PaginatorUpdateText(playerid, pagestr[])
+static stock TD_PaginatorUpdateText(playerid, const pagestr[])
 {
 	PlayerTextDrawSetString(playerid, TD_ListPage[playerid], pagestr);
 }
 
-static stock TD_HeaderCreate(playerid, text[], bg_color, fg_color, Float:pos_x, Float:pos_y)
+static stock TD_HeaderCreate(playerid, const text[], bg_color, fg_color, Float:pos_x, Float:pos_y)
 {
 	TD_ListHeader[playerid] = CreatePlayerTextDraw(playerid, pos_x, pos_y, text);
 	PlayerTextDrawLetterSize(playerid, TD_ListHeader[playerid], 0.3, 1.5);
@@ -466,7 +466,7 @@ static stock TD_HeaderCreate(playerid, text[], bg_color, fg_color, Float:pos_x, 
 	PlayerTextDrawShow(playerid, TD_ListHeader[playerid]);
 }
 
-static stock TD_ButtonCreate(playerid, &PlayerText:button, text[], bg_color, fg_color, Float:pos_x, Float:pos_y)
+static stock TD_ButtonCreate(playerid, &PlayerText:button, const text[], bg_color, fg_color, Float:pos_x, Float:pos_y)
 {
 	button = CreatePlayerTextDraw(playerid, pos_x, pos_y, text);
 	PlayerTextDrawLetterSize(playerid, button, 0.25, 1.4);
@@ -664,7 +664,7 @@ public OnPlayerClickTextDraw(playerid, Text:clickedid)
 
 */
 
-static stock TL_strcpy(result[], source[], const size = sizeof(result))
+static stock TL_strcpy(result[], const source[], const size = sizeof(result))
 {
 	result[0] = 0;
 	return strcat(result, source, size);

@@ -2,6 +2,32 @@
 
 #include "textlist.inc"
 
+TextListCreate:example_tl(playerid)
+{
+	new items[][TEXTLIST_MAX_ITEM_NAME] = {
+		"Test 1",
+		"Big Test 2"
+	};
+
+	new bg_colors[TEXTLIST_MAX_ITEMS] = {
+		0xFF0000FF,
+		0x00FF00FF
+	};
+
+	TextList_Open(playerid, TextList:example_tl, items, sizeof(items),
+	              "Example header",
+	              "Button 1", "Button 2",
+	              .lists_bg_color = bg_colors);
+}
+
+TextListResponse:example_tl(playerid, TextListType:response, itemid, itemvalue[])
+{
+	new string[128];
+	format(string, sizeof(string), " %d | %d | %d | %s", playerid, _:response, itemid, itemvalue);
+	SendClientMessage(playerid, -1, string);
+	return 1;
+}
+
 main() {
-	// write tests for libraries here and run "sampctl package run"
+	TextList_Show(0, TextList:example_tl);
 }
